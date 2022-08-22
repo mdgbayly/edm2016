@@ -17,6 +17,13 @@ USER_ID_KEY = 'user_id'
 
 LOGGER = logging.getLogger(__name__)
 
+def convert_dtype(x):
+    if not x:
+        return 0
+    try:
+        return int(x)
+    except:
+        return 0
 
 def load_data(file_path, item_id_col=SKILL_ID_KEY, template_id_col=None, concept_id_col=None,
               remove_nan_skill_ids=False, max_interactions_per_user=None,
@@ -47,8 +54,20 @@ def load_data(file_path, item_id_col=SKILL_ID_KEY, template_id_col=None, concept
         concept ids corresponding to the concept indices
     :rtype: (pd.DataFrame, np.ndarray[int], np.ndarray[int], np.ndarray[int])
     """
+
+    # raw_types = {'order_id': np.int32, 'teacher_id': np.int32, 'ms_first_response': np.int32, 'overlap_time': np.int32, 'user_id': np.int32, 'school_id': np.int32, 'assistment_id': np.int32, 'template_id': np.int32, 'assignment_id': np.int32, 'hint_count': np.int32, 'original': np.int32, 'first_action': np.int32, 'attempt_count': np.int32, 'problem_id': np.int32, 'sequence_id': np.int32, 'student_class_id': np.int32, 'hint_total': np.int32, 'position': np.int32, 'opportunity': np.int32, 'correct': np.int32, 'base_sequence_id': np.int32}
+
     data = pd.DataFrame.from_csv(file_path)
+
+    # data = pd.read_table(file_path, sep=',', index_col=False, dtype=raw_types)
+
+    # d = dict.fromkeys(data.select_dtypes([np.int64]).columns, np.int32)
+    # This conversion fails with TypeError: expected a readable buffer object
+    # So pulling out the integer types and trying to pass into the read_csv call instead
+    # data = data.astype(list(d.items()))
     LOGGER.info("Read {:3,d} rows from file".format(len(data)))
+
+    nan_cols = data.columns[data.isnull().any()]
 
     # Get the time index
     data[TIME_IDX_KEY] = data.index.values

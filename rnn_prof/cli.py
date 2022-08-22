@@ -58,68 +58,85 @@ common_options.add('--output', '-o', default='rnn_result',
                    help="Where to store the pickled output of training",
                    extra_callback=ensure_directory_callback)
 
+# PyCharm/PyDev Debugger options - just included so they are ignored by click
+
+# , 'ignore_unknown_options': True, 'allow_extra_args': True
+
 
 @click.group(context_settings={'help_option_names': ['-h', '--help']})
-def cli():
-    """ Collection of scripts for evaluating RNN proficiency models """
-    pass
+@click.option('--multiproc',  default=True, is_flag=True) # this option is specific to pydev
+@click.option('--qt-support') # this option is specific to pydev
+@click.option('--client') # this option is specific to pydev
+@click.option('--port') # this option is specific to pydev
+@click.option('--file') # this option is specific to pydev
+def cli(multiproc, qt_support, client, port, file):
+    """ Collection1 of scripts for evaluating RNN proficiency models """
+    click.echo('Group')
 
 
-@cli.command('rnn')
-@click.argument('source')
-@click.argument('data_file')
-@click.option('--compress-dim', '-d', type=int, nargs=1, default=100,
-              help="The dimension to which to compress the input. If -1, will do no compression")
-@click.option('--hidden-dim', '-h', type=int, nargs=1, default=100,
-              help="The number of hidden units in the RNN.")
-@click.option('--output-compress-dim', '-od', type=int, nargs=1, default=None,
-              help="The dimension to which we should compress the output vector. "
-                   "If not passed, no compression will occur.")
-@click.option('--test-spacing', '-t', type=int, nargs=1, default=10,
-              help="How many iterations before running the tests?")
-@click.option('--recurrent/--no-recurrent', default=True,
-              help="Whether to use a recurrent architecture")
-@click.option('--use-correct/--no-use-correct', default=True,
-              help="If True, record correct and incorrect responses as different input dimensions")
-@click.option('--num-iters', '-n', type=int, default=50,
-              help="How many iterations of training to perform on the RNN")
-@click.option('--dropout-prob', '-p', type=float, default=0.0,
-              help="The probability of a node being dropped during training. Default is 0.0 "
-                   "(i.e., no dropout)")
-@click.option('--use-hints/--no-use-hints', default=False,
-              help="Should we add a one-hot dimension to represent whether a student used a hint?")
-@click.option('--first-learning-rate', nargs=1, default=30.0, type=float,
-              help="The initial learning rate. Will decay at rate `decay_rate`. Default is 30.0.")
-@click.option('--decay-rate', nargs=1, default=0.99, type=float,
-              help="The rate at which the learning rate decays. Default is 0.99.")
-@common_options
-def rnn(common, source, data_file, compress_dim, hidden_dim, output_compress_dim, test_spacing,
-        recurrent, use_correct, num_iters, dropout_prob, use_hints, first_learning_rate,
-        decay_rate):
-    """ RNN based proficiency estimation.
-    SOURCE specifies the student data source, and should be 'assistments' or 'kddcup'.
-    DATA_FILE is the filename for the interactions data.
-    """
-    data_opts = DataOpts(num_folds=common.num_folds, item_id_col=common.item_id_col,
-                         concept_id_col=None, template_id_col=None, use_correct=use_correct,
-                         remove_skill_nans=common.remove_skill_nans, seed=common.seed,
-                         use_hints=use_hints,
-                         drop_duplicates=common.drop_duplicates,
-                         max_interactions_per_user=common.max_inter,
-                         min_interactions_per_user=common.min_inter,
-                         proportion_students_retained=common.proportion_students_retained)
-
-    data, _, item_ids, _, _ = load_data(data_file, source, data_opts)
-    num_questions = len(item_ids)
-    data_folds = split_data(data, num_folds=common.num_folds, seed=common.seed)
-    run_rnn.run(data_folds, common.num_folds, num_questions, num_iters, output=common.output,
-                compress_dim=compress_dim, hidden_dim=hidden_dim, test_spacing=test_spacing,
-                recurrent=recurrent, data_opts=data_opts, dropout_prob=dropout_prob,
-                output_compress_dim=output_compress_dim,
-                first_learning_rate=first_learning_rate, decay_rate=decay_rate,
-                which_fold=common.which_fold)
-
-
+# @cli.command('rnn', context_settings=dict(
+#     ignore_unknown_options=True,
+#     allow_extra_args=True
+# ))
+# @click.pass_context
+# @click.argument('source')
+# @click.argument('data_file')
+# @click.option('--compress-dim', '-d', type=int, nargs=1, default=100,
+#               help="The dimension to which to compress the input. If -1, will do no compression")
+# @click.option('--hidden-dim', '-h', type=int, nargs=1, default=100,
+#               help="The number of hidden units in the RNN.")
+# @click.option('--output-compress-dim', '-od', type=int, nargs=1, default=None,
+#               help="The dimension to which we should compress the output vector. "
+#                    "If not passed, no compression will occur.")
+# @click.option('--test-spacing', '-t', type=int, nargs=1, default=10,
+#               help="How many iterations before running the tests?")
+# @click.option('--recurrent/--no-recurrent', default=True,
+#               help="Whether to use a recurrent architecture")
+# @click.option('--use-correct/--no-use-correct', default=True,
+#               help="If True, record correct and incorrect responses as different input dimensions")
+# @click.option('--num-iters', '-n', type=int, default=50,
+#               help="How many iterations of training to perform on the RNN")
+# @click.option('--dropout-prob', '-p', type=float, default=0.0,
+#               help="The probability of a node being dropped during training. Default is 0.0 "
+#                    "(i.e., no dropout)")
+# @click.option('--use-hints/--no-use-hints', default=False,
+#               help="Should we add a one-hot dimension to represent whether a student used a hint?")
+# @click.option('--first-learning-rate', nargs=1, default=30.0, type=float,
+#               help="The initial learning rate. Will decay at rate `decay_rate`. Default is 30.0.")
+# @click.option('--decay-rate', nargs=1, default=0.99, type=float,
+#               help="The rate at which the learning rate decays. Default is 0.99.")
+# @click.argument('debug_args', nargs=-1, type=click.UNPROCESSED)
+# @common_options
+# def rnn(common, source, data_file, compress_dim, hidden_dim, output_compress_dim, test_spacing,
+#         recurrent, use_correct, num_iters, dropout_prob, use_hints, first_learning_rate,
+#         decay_rate, debug_args):
+#     """ RNN based proficiency estimation.
+#     SOURCE specifies the student data source, and should be 'assistments' or 'kddcup'.
+#     DATA_FILE is the filename for the interactions data.
+#     """
+#     data_opts = DataOpts(num_folds=common.num_folds, item_id_col=common.item_id_col,
+#                          concept_id_col=None, template_id_col=None, use_correct=use_correct,
+#                          remove_skill_nans=common.remove_skill_nans, seed=common.seed,
+#                          use_hints=use_hints,
+#                          drop_duplicates=common.drop_duplicates,
+#                          max_interactions_per_user=common.max_inter,
+#                          min_interactions_per_user=common.min_inter,
+#                          proportion_students_retained=common.proportion_students_retained)
+#
+#     data, _, item_ids, _, _ = load_data(data_file, source, data_opts)
+#     num_questions = len(item_ids)
+#     data_folds = split_data(data, num_folds=common.num_folds, seed=common.seed)
+#     run_rnn.run(data_folds, common.num_folds, num_questions, num_iters, output=common.output,
+#                 compress_dim=compress_dim, hidden_dim=hidden_dim, test_spacing=test_spacing,
+#                 recurrent=recurrent, data_opts=data_opts, dropout_prob=dropout_prob,
+#                 output_compress_dim=output_compress_dim,
+#                 first_learning_rate=first_learning_rate, decay_rate=decay_rate,
+#                 which_fold=common.which_fold)
+#
+#
+# @click.command('irt', context_settings=dict(
+#     allow_interspersed_args=True
+# ))
 @cli.command('irt')
 @click.argument('source')
 @click.argument('data_file')
@@ -170,31 +187,39 @@ def irt(common, source, data_file, twopo, concept_id_col, template_precision,
                 item_precision=item_precision)
 
 
-@cli.command('naive')
-@click.argument('source')
-@click.argument('data_file')
-@common_options
-def naive(common, source, data_file):
-    """ Just report the percent correct across all events.
-    SOURCE specifies the student data source, and should be 'assistments' or 'kddcup'.
-    DATA_FILE is the filename for the interactions data.
-    """
-    data_opts = DataOpts(num_folds=common.num_folds, item_id_col=common.item_id_col,
-                         concept_id_col=None, template_id_col=None, use_correct=True,
-                         remove_skill_nans=common.remove_skill_nans, seed=common.seed,
-                         use_hints=True,
-                         drop_duplicates=common.drop_duplicates,
-                         max_interactions_per_user=common.max_inter,
-                         min_interactions_per_user=common.min_inter,
-                         proportion_students_retained=common.proportion_students_retained)
-    data, _, _, _, _ = load_data(data_file, source, data_opts)
-    print "Percentage correct in data set is {}".format(data.correct.mean())
+# @cli.command('naive', context_settings=dict(
+#     ignore_unknown_options=True,
+#     allow_extra_args=True
+# ))
+# @click.pass_context
+# @click.argument('source')
+# @click.argument('data_file')
+# @click.argument('debug_args', nargs=-1, type=click.UNPROCESSED)
+# @common_options
+# def naive(common, source, data_file, debug_args):
+#     """ Just report the percent correct across all events.
+#     SOURCE specifies the student data source, and should be 'assistments' or 'kddcup'.
+#     DATA_FILE is the filename for the interactions data.
+#     """
+#     data_opts = DataOpts(num_folds=common.num_folds, item_id_col=common.item_id_col,
+#                          concept_id_col=None, template_id_col=None, use_correct=True,
+#                          remove_skill_nans=common.remove_skill_nans, seed=common.seed,
+#                          use_hints=True,
+#                          drop_duplicates=common.drop_duplicates,
+#                          max_interactions_per_user=common.max_inter,
+#                          min_interactions_per_user=common.min_inter,
+#                          proportion_students_retained=common.proportion_students_retained)
+#     data, _, _, _, _ = load_data(data_file, source, data_opts)
+#     print "Percentage correct in data set is {}".format(data.correct.mean())
+#
+#     agged = data.groupby(USER_IDX_KEY).correct.agg([np.sum, len]).reset_index()
+#     mask = agged['sum'] <= agged['len'] // 2
+#     agged.loc[mask, 'sum'] = agged.loc['len', mask] - agged.loc['sum', mask]
+#     print "Percent correct for naive classifier is {}".format(agged['sum'].sum() /
+#                                                               agged['len'].sum())
 
-    agged = data.groupby(USER_IDX_KEY).correct.agg([np.sum, len]).reset_index()
-    mask = agged['sum'] <= agged['len'] // 2
-    agged.loc[mask, 'sum'] = agged.loc['len', mask] - agged.loc['sum', mask]
-    print "Percent correct for naive classifier is {}".format(agged['sum'].sum() /
-                                                              agged['len'].sum())
+
+# @cli.command('foreach', context_settings=dict(ignore_unknown_options=True))
 
 
 def main():

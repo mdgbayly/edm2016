@@ -10,8 +10,8 @@ setup(
     author_email="help@knewton.com",
     license="Apache License 2.0",
     packages=find_packages(),
-    install_requires=open('requirements.in', 'r').readlines(),
-    tests_require=open('requirements.testing.in', 'r').readlines(),
+    install_requires=open('requirements2.txt', 'r').readlines(),
+    tests_require=open('requirements.testing2.txt', 'r').readlines(),
     description="Code for our EDM 2016 submission including DKT and IRT variants",
     entry_points="""
         [console_scripts]

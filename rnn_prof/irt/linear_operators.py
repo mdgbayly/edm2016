@@ -80,12 +80,16 @@ class IndexOperator(LinearOperator):
             raise ValueError("dim_x ({}) must be None or at least max(index_map)+1 ({})".format(
                 dim_x, np.max(index_map) + 1))
         self.dim_x = dim_x or np.max(index_map) + 1
-        self.index_map = index_map.astype(int)
-        if index_map.dtype != int:
+        self.index_map = index_map.astype(np.int64)
+        if index_map.dtype != np.int64 and index_map.dtype != np.int32:
             raise ValueError("Index map must be a numpy array of integers")
         if np.any(index_map < 0):
             raise ValueError("Index map must be positive")
         super(IndexOperator, self).__init__(shape=(len(index_map), self.dim_x),
-                                            matvec=self._index,
-                                            rmatvec=self._reverse_index,
                                             dtype=bool)
+
+    def _matvec(self, x):
+        return self._index(x)
+
+    def _rmatvec(self, x):
+        return self._reverse_index(x)
